@@ -1,5 +1,5 @@
 # Example: Hello World
-This example demonstrates some very simple functionality of the SSE protocol. For simplicity and readability, this example is scaled down to cover only the basics.
+This example demonstrates some very simple functionality of the SSE protocol. For simplicity and readability, it is scaled down to cover only the basics.
 
 ## Content
 * [Script evaluation](#script-evaluation)
@@ -9,6 +9,7 @@ This example demonstrates some very simple functionality of the SSE protocol. Fo
     * [`HelloWorldAggr` function](#helloworldaggr-function)
     * [`Cache` function](#cache-function)
     * [ `NoCache` function](#nocache-function)
+    * [ `EchoTable_3` function](#echotable_3-function)
 * [Qlik documents](#qlik-documents)
 * [Run the example!](#run-the-example)
 
@@ -145,6 +146,7 @@ The JSON file includes the following information:
 | HelloWorldAggr | 1 | 1 (aggregation)  | 0 (string) | __name:__ 'str1', __type:__ 0 (string) |
 | Cache | 2 | 2 (tensor) | 0 (string) | __name:__ 'str1', __type:__ 0 (string) |
 | NoCache | 3 | 2 (tensor) | 0 (string) | __name:__ 'str1', __type:__ 0 (string) |
+| EchoTable_3 | 4 | 2 (tensor) | 2 (dual) | __name:__ 'col1', __type:__ 2 (dual); __name:__ 'col2', __type:__ 2 (dual); __name:__ 'col3', __type:__ 2 (dual) |
 
 The ID is mapped to the implemented method name in the `functions` method, below:
 
@@ -159,7 +161,8 @@ class ExtensionService(SSE.ConnectorServicer):
             0: '_hello_world',
             1: '_hello_world_aggr',
             2: '_cache',
-            3: '_no_cache'
+            3: '_no_cache',
+            4: '_echo_table'
         }
 ```
 
@@ -260,12 +263,39 @@ def _no_cache(request, context):
             yield SSE.BundledRows(rows=[SSE.Row(duals=duals)])
 ```
 
+### `EchoTable_3` function
+
+We just echo back exactly the information that was sent, and without adding table headers.
+Since we do not add table headers, the returned table gets the default column names Field1, Field2, Field3.
+
+``` python
+    @staticmethod
+    def _echo_table(request, context):
+        """
+        Echo the input table.
+        :param request:
+        :param context:
+        :return:
+        """
+        for request_rows in request:
+            response_rows = []
+            for row in request_rows.rows:
+                response_rows.append(row)
+            yield SSE.BundledRows(rows=response_rows)
+```
+
 ## Qlik documents
-An example document is given for Qlik Sense (SSE_Hello_World.qvf) and QlikView (SSE_Hello_World.qvw). The example consists of three sheets, one with script function calls and two with user defined function calls. The function calls on each of the first two sheets demonstrate the same functionality. We use a table for the tensor call and a KPI object for the aggregation call. On the third sheet we demonstrate enabling and disabling the cache for a specific function. A field called __HelloWorldData__ consisting of two rows of strings is loaded into the Qlik engine.
+We provide example documents for Qlik Sense (SSE_Hello_World.qvf) and QlikView (SSE_Hello_World.qvw). The example consists of four sheets, one with script function calls, two with user defined function calls and one with the result of table load. The function calls on each of the first two sheets demonstrate the same functionality. We use a table for the tensor call and a KPI object for the aggregation call. On the third sheet we demonstrate enabling and disabling the cache for a specific function. A field called __HelloWorldData__ consisting of two rows of strings is loaded into the Qlik engine.
 
 For the user defined functions we use the expressions `HelloWorld.HelloWorld(HelloWorldData)`, `HelloWorld.HelloWorldAggr(HelloWorldData)`, `HelloWorld.Cache(HelloWorldData)` and `HelloWorld.NoCache(HelloWorldData)`. The calls are straightforward, with the data field sent as a parameter to each function.
 
 For the script calls we use `HelloWorld.ScriptEvalStr('args[0]', HelloWorldData)` and `HelloWorld.ScriptAggrStr('", ".join(args[0])', HelloWorldData)` where `'args[0]'` and `'", ".join(args[0])'` are the scripts and `HelloWorldData` is the parameter. The parameters are reached in Python by the variable name `args` and is a list with each parameter as an entry. Therefore, `[0]` refers to the first parameter.
+
+The Table load sheet shows the result of calling EchoTable_3 from the load script. 
+The load script references the same column three times and passes it as three columns to the Server-side extension. 
+Generic column names are then mapped to field names such as `Echo1`.
+
+`LOAD Field1 AS Echo1, Field2 AS Echo2, Field3 AS Echo3 EXTENSION HelloWorld.EchoTable_3(HelloWorldTable{HelloWorldData, HelloWorldData, HelloWorldData});`
 
 ## Run the example!
 To run this example, follow the instructions in [Getting started with the Python examples](../GetStarted.md).
