@@ -1,5 +1,5 @@
 # Example: Column operations
-In this example we cover some basic calculations and support for different function types. Compared with the Hello World example we cover numerics only, to keep simplicity.
+In this example we cover some basic calculations and support for different function types. Only numerical functions are used, for the sake of simplicity.
 
 ## Content
 * [Script evaluation](#script-evaluation)
@@ -7,6 +7,7 @@ In this example we cover some basic calculations and support for different funct
 * [Defined functions](#defined-functions)
     * [`SumOfRows` function](#sumofrows-function)
     * [`SumOfColumn` function](#sumofcolumn-function)
+    * [`MaxOfColumns_2` function](#maxofcolumns2-function)
 * [Qlik documents](#qlik-documents)
 * [Run the example!](#run-the-example)
 
@@ -39,7 +40,7 @@ class ExtensionService(SSE.ConnectorServicer):
                               'Function type {} is not supported in this plugin.'.format(func_type.name))
 ```
 
-If the function type is supported, we continue by retrieving data types and check for parameters. Depending on function type we either evaluate the script row wise (tensor) or collect all row values to evaluate the script once (aggregation).
+If the function type is supported, we continue by retrieving data types and checking for parameters. Depending on function type we either evaluate the script row-wise (tensor) or collect all row values to evaluate the script once (aggregation).
 
 ```python
 import grpc
@@ -96,7 +97,7 @@ class ScriptEval:
 
 ```
 
-In the same class we have defined both the `get_arguments` and `evaluate` methods. The parameters are fetched based on data type and if the data type is not supported, an error is raised. The `evaluate` method does the evaluating of the script itself, as well as transforming the result to the desired form, bundled rows.
+In the same class we have defined both the `get_arguments` and `evaluate` methods. Parameters are fetched based on data type and if the data type is not supported, an error is raised. The `evaluate` method does the evaluating of the script itself, as well as transforming the result to the desired form, bundled rows.
 
 ```python
 class ScriptEval:
@@ -130,12 +131,13 @@ class ScriptEval:
 ```
 
 ## Defined functions
-This plugin has two user defined functions, `SumOfRows` and `SumOfColumn`, both operating on numerical data. The `ExecuteFunction` method in the `ExtensionService` class is the same for any of the example plugins, but the JSON file and the `functions` method are different. The JSON file for this plugin includes the following information:
+This plugin has three user defined functions, `SumOfRows`, `SumOfColumn` and `MaxOfColumns_2`, all operating on numerical data. The `ExecuteFunction` method in the `ExtensionService` class is the same for any of the example plugins, but the JSON file and the `functions` method are different. The JSON file for this plugin includes the following information:
 
 | __Function Name__ | __Id__ | __Type__ | __ReturnType__ | __Parameters__ |
 | ----- | ----- | ----- | ------ | ----- |
 | SumOfRows | 0 | 2 (tensor) | 1 (numeric) | __name:__ 'col1', __type:__ 1 (numeric); __name:__ 'col2', __type:__ 1(numeric) |
 | SumOfColumn | 1 | 1 (aggregation) | 1 (numeric) | __name:__ 'col1', __type:__ 1 (numeric) |
+| MaxOfColumns_2 | 2 | 2 (tensor) | 1 (numeric) | __name:__ 'col1', __type:__ 1 (numeric); __name:__ 'col2', __type:__ 1(numeric) |
 
 The ID is mapped to the implemented function name in the `functions` method, below:
 ```python
@@ -147,12 +149,13 @@ class ExtensionService(SSE.ConnectorServicer):
     def functions(self):
         return {
             0: '_sum_of_rows',
-            1: '_sum_of_column'
+            1: '_sum_of_column',
+            2: '_max_of_columns_2'
         }
 ```
 
 ### `SumOfRows` function
-The first function is a tensor function adding two columns row wise. We iterate over the `BundledRows` and extract the numerical values, which we then add togehter and transform into the desired form.
+The `SumOfRows` function is a tensor function summing two columns row-wise. We iterate over the `BundledRows` and extract the numerical values, which we then add together and transform into the desired form.
 
 ```python
     @staticmethod
@@ -180,7 +183,7 @@ The first function is a tensor function adding two columns row wise. We iterate 
 ```
 
 ### `SumOfColumn` function
-The second function is an aggregation and sums the values in a column. We iterate over the `BundledRows` again and retrieve the numerical values, appending them to a list. After iterating over all rows, we add the values together and then return the result as bundled rows.
+The `SumOfColumn` function is an aggregation and sums the values in a column. We iterate over the `BundledRows` again and retrieve the numerical values, appending them to a list. After iterating over all rows, we add the values together and then return the result as bundled rows.
 
 ```python
     @staticmethod
@@ -205,13 +208,58 @@ The second function is an aggregation and sums the values in a column. We iterat
         # Yield the row data constructed
         yield SSE.BundledRows(rows=[SSE.Row(duals=duals)])
 ```
+### `MaxOfColumns_2` function
+The `MaxOfColumns_2` function computes the maximum in each of two columns and returns the maximum values in two columns, therefore making it appropriate to be used from the Qlik load script. As you can see, the function also sets the TableDescription header before sending the result.
+
+```python
+    @staticmethod
+    def _max_of_columns_2(request, context):
+        """
+        Find max of each column. This is a table function.
+        :param request: an iterable sequence of RowData
+        :param context:
+        :return: a table with numerical values, two columns and one row
+        """
+
+        result = [_MINFLOAT]*2
+
+        # Iterate over bundled rows
+        for request_rows in request:
+            # Iterating over rows
+            for row in request_rows.rows:
+                # Retrieve the numerical value of each parameter
+                # and update the result variable if it's higher than the previously saved value
+                for i in range(0, len(row.duals)):
+                    result[i]=max(result[i], row.duals[i].numData)
+
+        # Create an iterable of dual with numerical value
+        duals = iter( [SSE.Dual(numData=r) for r in result])
+
+        # Set and send Table header
+        table = SSE.TableDescription(name='MaxOfColumns', numberOfRows=1)
+        table.fields.add(name='Max1', dataType=SSE.NUMERIC)
+        table.fields.add(name='Max2', dataType=SSE.NUMERIC)
+        md = (('qlik-tabledescription-bin', table.SerializeToString()),)
+        context.send_initial_metadata(md)
+        
+        # Yield the row data constructed
+        yield SSE.BundledRows(rows=[SSE.Row(duals=duals)])
+```
 
 ## Qlik documents
-An example document is given for Qlik Sense (SSE_Column_Operations.qvf) and QlikView (SSE_Column_Operations.qvw). There are are two sheets in this example. One contains script calls and the other contains user defined function calls. We demonstrate a tensor function, which sums two columns row-wise, and an aggregating function, which sums all rows in a column returning a single value. The data loaded in the Data Load Editor are two fields, *A* and *B*, each of which contain five numeric values.
+We provide example documents for Qlik Sense (SSE_Column_Operations.qvf) and QlikView (SSE_Column_Operations.qvw).
+There are three sheets in this example: one with script calls, one with user defined function calls, and one with the result of an SSE Table Load.
+We demonstrate a tensor function, which sums two columns row-wise, and an aggregating function, which sums all rows in a column returning a single value.
+The data loaded in the Data Load Editor are two fields, *A* and *B*, each of which contain five numeric values.
 
 The aggregating script function is called with the expression `Column.ScriptAggr('sum(args[0])', A)`, where `'sum(args[0])'` is the script and `A` is the data field. The script returns a single value when evaluated. The second script call is `Column.ScriptEval('args[0]+args[1]',A,B)` with the script `'args[0]+args[1]'` adding the two parameters `A` and `B` row-wise. The result is an array with five values, each a sum of the  corresponding values in `A` and `B`.
 
-The user defined function calls are straightforward as implemented. The aggregating function `SumOfColumn` is called with `Column.SumOfColumn(A)` and the tensor function `SumOfRows` is called with `Column.SumOfRows(A,B)`.
+The user-defined functions are straightforward to call, since they become integrated in the script syntax.
+A column is aggregated with `Column.SumOfColumn(A)` and the tensor function `SumOfRows` is called with `Column.SumOfRows(A,B)`.
+
+The `EXTENSION` load operation in the Qlik load script maps generic column names to field names.
+
+`LOAD Max1 AS A_max, Max2 AS B_max EXTENSION Column.MaxOfColumns_2(DataTable);`
 
 ## Run the example!
 To run this example, follow the instructions in [Getting started with the Python examples](../GetStarted.md).
