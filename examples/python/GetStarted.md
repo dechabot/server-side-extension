@@ -57,7 +57,7 @@ Follow these steps to quickly set up and run an example of your choice on your l
 ### QlikView Desktop
 1. Install QlikView Desktop (November 2017 release or later).
 2. Make sure you have Python 3.4 (or later) installed as well as the `grpcio` package. For more information, see [Prerequisites for running the Python examples](prerequisites.md).
-3. Add `SSEPlugin=<EngineName>,localhost:<port>` on a new line in your *Settings.ini* file located at *C:\Users\\[user]\AppData\Roaming\QlikTech\QlikView*. Insert the values for `<EngineName>` and `<port>` from the table above for the selected example.
+3. Add `SSEPlugin=<EngineName>,localhost:<port>` on a new line in your *Settings.ini* file, below the heading [Settings 7]. *Settings.ini* is located at *C:\Users\\[user]\AppData\Roaming\QlikTech\QlikView*. Insert the values for `<EngineName>` and `<port>` from the table above for the selected example.
 4. Run the corresponding `ExtensionService_<examplename>.py` file. The easiest way to do this is to open a command prompt, go to the selected example folder and type:
 
    `python ExtensionService_<examplename>.py`  
@@ -68,7 +68,7 @@ Follow these steps to quickly set up and run an example of your choice on your l
 ### QlikView Server
 1. Install QlikView Server (November 2017 release or later).
 2. Make sure you have Python 3.4 (or later) installed as well as the `grpcio` package. For more information, see [Prerequisites for running the Python examples](prerequisites.md).
-3. Add `SSEPlugin=<EngineName>,localhost:<port>` on a new line in your *Settings.ini* file located at *C:\ProgramData\QlikTech\QlikViewServer*. Insert the values for `<EngineName>` and `<port>` from the table above for the selected example.
+3. Add `SSEPlugin=<EngineName>,localhost:<port>` on a new line in your *Settings.ini* file, below the heading [Settings 7]. *Settings.ini* is located at *C:\ProgramData\QlikTech\QlikViewServer*. Insert the values for `<EngineName>` and `<port>` from the table above for the selected example.
 4. Add the *.qvw* file from the selected example folder to your document root (e.g. *C:\ProgramData\QlikTech\Documents*) or a mounted folder.
 5. Run the corresponding `ExtensionService_<examplename>.py` file. The easiest way to do this is to open a command prompt, go to folder for the selected example and type:
 
@@ -76,3 +76,7 @@ Follow these steps to quickly set up and run an example of your choice on your l
 
    Insert the value for `<examplename>` from the table above for the selected example.
 6. Start QlikView Server and open the app for the example you chose.
+
+## Configuring all Python examples at once (except Qlik Sense Enterprise)
+In order to use all three Python examples in parallel, all you have to do is to map a different name to each port on the same line in *Settings.ini*:
+`SSEPlugin=Script,localhost:50051;HelloWorld,localhost:50052;Column,localhost:50053;`
