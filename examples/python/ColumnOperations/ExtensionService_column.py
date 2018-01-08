@@ -117,9 +117,6 @@ class ExtensionService(SSE.ConnectorServicer):
         # Yield the row data constructed
         yield SSE.BundledRows(rows=[SSE.Row(duals=duals)])
 
-
-    
-
     @staticmethod
     def _max_of_columns_2(request, context):
         """
@@ -138,10 +135,10 @@ class ExtensionService(SSE.ConnectorServicer):
                 # Retrieve the numerical value of each parameter
                 # and update the result variable if it's higher than the previously saved value
                 for i in range(0, len(row.duals)):
-                    result[i]=max(result[i], row.duals[i].numData)
+                    result[i] = max(result[i], row.duals[i].numData)
 
         # Create an iterable of dual with numerical value
-        duals = iter( [SSE.Dual(numData=r) for r in result])
+        duals = iter([SSE.Dual(numData=r) for r in result])
 
         # Set and send Table header
         table = SSE.TableDescription(name='MaxOfColumns', numberOfRows=1)
