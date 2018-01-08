@@ -38,6 +38,8 @@ We provide an example Qlik Sense document (SSE_Full_Script_Support_pandas.qvf). 
 
 In the load script there is an example of the `Load ...  Extension ...` syntax for a table load using SSE. There are also examples of using SSE expressions within a regular load. In that case the SSE call is treated as a scalar or aggregation and only one column can be returned.
 
+In comparison to the original Full Script Support example, the table load using the `Load ... Extension ...` also includes an example of how to write the `TableDescription` from the script.
+
 There are a number of examples in the sheets of how to retrieve the data from the script, and how to make simple calculations.
 
 
