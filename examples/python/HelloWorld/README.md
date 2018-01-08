@@ -29,11 +29,11 @@ In this plugin we have a couple of pre-defined functions, which cannot be modifi
 | NoCache | 3 | 2 (tensor) | 0 (string) | __name:__ 'str1', __type:__ 0 (string) |
 | EchoTable_3 | 4 | 2 (tensor) | 0 (string) | __name:__ 'col1', __type:__ 0 (string); __name:__ 'col2', __type:__ 0 (string); __name:__ 'col3', __type:__ 0 (string) |
 
-Both _HelloWorld_ and _EchoTable_3_ returns the same data as received, the difference is the number of columns. The latter is used to demonstrate the `Load ... Extension ...` syntax in the Qlik load script where you can return a table of multiple columns using SSE.
+Both `HelloWorld` and `EchoTable_3` returns the same data as received, the difference is the number of columns. The latter is used to demonstrate the `Load ... Extension ...` syntax in the Qlik load script where you can return a table of multiple columns using SSE.
 
-The _HelloWorldAggr_ function is aggregating all rows to a single string.
+The `HelloWorldAggr` function is aggregating all rows to a single string.
 
-The _Cache_ and _NoCache_ functions demonstrates how caching works by adding a date-time stamp in the end of each string value on each row. Caching is enabled by default and you can disable it by sending a header with metadata including the `qlik-cache` key set to `no-store`. In the example app the user will see that the date-time stamps will be updated for the _NoCache_ function for all selections, but only for new selections for the _Cache_ function.
+The `Cache` and `NoCache` functions demonstrates how caching works by adding a date-time stamp in the end of each string value on each row. Caching is enabled by default and you can disable it by sending a header with metadata including the `qlik-cache` key set to `no-store`. In the example app the user will see that the date-time stamps will be updated for the `NoCache` function for all selections, but only for new selections for the `Cache` function.
 
 ``` python
 md = (('qlik-cache', 'no-store'),)
@@ -46,7 +46,7 @@ We provide example documents for Qlik Sense (SSE_Hello_World.qvf) and QlikView (
 
 There are a number of examples in the sheets demonstrating the same simple functionality using script functions as well as defined functions.
 
-In the Qlik load script there is an example of the `Load ...  Extension ...` syntax for a table load using SSE. Since the _EchoTable_3_ function, used in the load statement, does not send a `TableDescription` the returned columns have the default names _Field1_, _Field2_ and _Field3_, which are then renamed in the load statement. There are also examples of using SSE expressions within a regular load. In that case the SSE call is treated as a scalar or aggregation and only one column can be returned.
+In the Qlik load script there is an example of the `Load ...  Extension ...` syntax for a table load using SSE. Since the `EchoTable_3` function, used in the load statement, does not send a `TableDescription` the returned columns have the default names _Field1_, _Field2_ and _Field3_, which are then renamed in the load statement. There are also examples of using SSE expressions within a regular load. In that case the SSE call is treated as a scalar or aggregation and only one column can be returned.
 
 ## Run the example!
 To run this example, follow the instructions in [Getting started with the Python examples](../GetStarted.md).
