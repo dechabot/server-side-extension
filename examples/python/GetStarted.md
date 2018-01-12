@@ -6,12 +6,12 @@ We provide several examples at different levels of complexity, each of which is 
 
 The following table includes a short description of each example and the functionality it demonstrates.
 
-| __Example__ | __Evaluation__ | __Function types__ | __Data types__ |  __Cache__ | __Description__ |
-|-----|------|-----|-----|----|-----|
-| __Hello world__ | Script, function | Tensor, Aggregation | String | Enabled (default), Disabled | Returns the same values as received, aggregating all values to a single string, both in script and function calls. Also demonstrates two functions with cache enabled, by default, and disabled by adding date time stamps to the end of each string value.|
-| __Column operations__ | Script, function| Tensor, Aggregation | Numeric | Enabled (default) | Adds two columns row-wise (tensor). Sums values in a column (aggregation). Demonstrates functionality both as script calls and function calls. |
-| __Full script support__ | Script | Scalar, Aggregation, Tensor | Numeric, String, Dual | Enabled (default) | Full script support including SSE calls in both load-script and in chart expressions. The Python code to be executed is written in the expression field directly, as a parameter to one of the script functions.|
-| __Full script support using Pandas__ | Script | Scalar, Aggregation, Tensor | Numeric, String, Dual | Enabled (default) | Using the Pandas library and exec method to evaluate the script instead of eval. Otherwise the same example as the original full script support |
+| __Example__ | __Evaluation__ | __Data types__ | __Description__ |
+|-----|------|-----|----|
+| __Hello world__ | Script, function | String | Returns the same values as received, aggregating all values to a single string, both in script and function calls. Also demonstrates two functions with cache enabled, by default, and disabled by adding date time stamps to the end of each string value.|
+| __Column operations__ | Script, function| Numeric | Adds two columns row-wise (tensor). Sums values in a column (aggregation). Demonstrates functionality both as script calls and function calls. |
+| __Full script support__ | Script | Numeric, String, Dual | Full script support including SSE calls in both load-script and in chart expressions. All script functions are supported.|
+| __Full script support using Pandas__ | Script | Numeric, String, Dual | Using the Pandas library and exec method to evaluate the script instead of eval. Also includes an example of writing a `TableDescription` in the script to be evaluated, when using the `Load ... Extension ...` statement. Otherwise it is the same example as the original full script support with all script functions supported. |
 
 For details about a particular example, see its documentation:
 - [Hello world](HelloWorld/README.md)

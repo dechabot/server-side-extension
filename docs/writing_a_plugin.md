@@ -91,7 +91,7 @@ where:
 * `<FunctionName>`: The name of the function sent in `GetCapabilities`
 * `<Parameter>`: The function parameter(s). Depending on the definition, there could be multiple parameters of different types. Multiple parameters are comma separated.
 
-Remember that Qlik only takes the first column of data sent back from the plugin; if there are more they are ignored. Read more about *function types* in the API reference, [Protocol Documentation](SSE_Protocol.md).
+Remember that Qlik can receive multiple columns using the `Load ... Extension ...` statement in the Qlik load script, in all other cases the first column of data sent back from the plugin is used by Qlik; if there are more they are ignored. Read more about *function types* in the API reference, [Protocol Documentation](SSE_Protocol.md).
 
 ## Implementation
 The implementation of the plugins are language-dependent. We have provided examples for some languages (see the */examples* folder for more information). However, there are some things to remember independently of the language you choose.
@@ -140,7 +140,7 @@ The default behavior of the Qlik engine is to cache results from computations in
 Caching is automatically turned off in Qlik if a request fails due to the communication failure or an exception is raised during a call.
 
 #### `TableDescription`
-This header must be sent as initial metadata, that is _before_ the plugin starts sending back the response data to Qlik. The information is only handled by Qlik within a data load, more precisely, in a `LOAD ... EXTENSION ...` statement. By sending the header, you can set metadata for the returned table such as __names__, __data types__, __tags__ etc.
+This header must be sent as initial metadata, that is _before_ the plugin starts sending back the response data to Qlik. The information is only handled by Qlik within a data load, more precisely, in a `Load ... Extension ...` statement. By sending the header, you can set metadata for the returned table such as __names__, __data types__, __tags__ etc.
 
 There are a few things to keep in mind when sending a `TableDescription`:
 * The number of `FieldDescriptions` in the message must match the number of returned fields to Qlik. Otherwise an error is raised.
@@ -154,7 +154,7 @@ See more details in the [TableDescription](SSE_Protocol.md#qlik.see.TableDescrip
 
 It is possible to make an SSE call from both the load script and from a chart expression.  
 
-You can return a table from the SSE plugin using the `LOAD ... EXTENSION ...` statement in the Qlik load script. Read more about the syntax for table load using SSE in the [Qlik Sense help](http://help.qlik.com/en-US/sense/February2018/Subsystems/Hub/Content/Scripting/ScriptRegularStatements/Load.htm) .  
+You can return a table from the SSE plugin using the `Load ... Extension ...` statement in the Qlik load script. Read more about the syntax for table load using SSE in the [Qlik Sense help](http://help.qlik.com/en-US/sense/February2018/Subsystems/Hub/Content/Scripting/ScriptRegularStatements/Load.htm) .  
 
 Note that calls to SSE functions from within any other load statements, e.g. `Load ... From ...`, only support scalar and aggregation function types. This implies that data containing n rows, will result in n calls to the plugin unless you are aggregating the data resulting in a single call.
 
